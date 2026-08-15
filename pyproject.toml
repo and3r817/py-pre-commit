@@ -1,0 +1,24 @@
+[project]
+name = "py-pre-commit"
+version = "0.2.0"
+description = "Shared lint and check hooks for the duckalpha repos."
+requires-python = ">=3.14"
+dependencies = [
+    "ruff==0.16.3",
+    "pre-commit-hooks==6.0.0",
+    "uv==0.12.5",
+]
+
+[project.scripts]
+py-lint = "py_pre_commit.lint:main"
+py-check = "py_pre_commit.check:main"
+
+[dependency-groups]
+dev = ["pytest>=8.4.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/py_pre_commit"]

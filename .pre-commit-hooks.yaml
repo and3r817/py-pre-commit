@@ -1,0 +1,17 @@
+- id: lint
+  name: lint
+  description: ruff check, ruff format, file hygiene, uv lock
+  entry: py-lint
+  language: python
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+
+- id: check
+  name: check
+  description: ty, vulture, deptry
+  entry: py-check
+  language: python
+  pass_filenames: false
+  always_run: true
+  require_serial: true
