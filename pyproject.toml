@@ -7,6 +7,7 @@ dependencies = [
     "ruff==0.16.3",
     "pre-commit-hooks==6.0.0",
     "uv==0.12.5",
+    "identify==2.6.19",
 ]
 
 [project.scripts]
