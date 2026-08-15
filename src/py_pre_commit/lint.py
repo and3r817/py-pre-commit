@@ -1,5 +1,6 @@
 import subprocess
 from collections.abc import Callable
+from fnmatch import fnmatch
 
 from identify.identify import tags_from_path
 
@@ -20,6 +21,8 @@ HYGIENE: tuple[tuple[tuple[str, ...], tuple[str, ...], bool], ...] = (
     (("debug-statement-hook",), ("*.py",), False),
 )
 
+BINARY_VISIBLE = frozenset({"check-added-large-files"})
+
 
 def steps(resolve: Callable[[tuple[str, ...], bool], list[str]]) -> list[tuple[str, ...]]:
     commands = list(WHOLE_PROJECT)
@@ -30,15 +33,29 @@ def steps(resolve: Callable[[tuple[str, ...], bool], list[str]]) -> list[tuple[s
     return commands
 
 
-def _tracked(globs: tuple[str, ...], text_only: bool) -> list[str]:
+def _tracked() -> list[str]:
     completed = subprocess.run(
-        ("git", "ls-files", "-z", *globs), capture_output=True, text=True, check=True
+        ("git", "ls-files", "-z"), capture_output=True, text=True, check=True
     )
-    paths = [path for path in completed.stdout.split("\0") if path]
-    if text_only:
-        paths = [path for path in paths if "text" in tags_from_path(path)]
-    return paths
+    return [path for path in completed.stdout.split("\0") if path]
+
+
+def _resolver() -> Callable[[tuple[str, ...], bool], list[str]]:
+    tracked = _tracked()
+    text = {path for path in tracked if "text" in tags_from_path(path)}
+
+    def resolve(globs: tuple[str, ...], text_only: bool) -> list[str]:
+        paths = tracked
+        if globs:
+            paths = [
+                path for path in paths if any(fnmatch(path, glob) for glob in globs)
+            ]
+        if text_only:
+            paths = [path for path in paths if path in text]
+        return paths
+
+    return resolve
 
 
 def main() -> int:
-    return max(subprocess.run(cmd).returncode for cmd in steps(_tracked))
+    return max(subprocess.run(cmd).returncode for cmd in steps(_resolver()))

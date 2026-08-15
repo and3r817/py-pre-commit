@@ -38,11 +38,16 @@ def steps(members: Sequence[tuple[str, str]]) -> list[tuple[str, ...]]:
     ]
 
 
-def _members() -> list[tuple[str, str]]:
-    return sorted(
-        (path.parent.name, next(child.name for child in sorted(path.iterdir()) if child.is_dir()))
-        for path in Path().glob("*/src")
+def _package(src: Path) -> str:
+    return next(
+        child.name
+        for child in sorted(src.iterdir())
+        if child.is_dir() and (child / "__init__.py").exists()
     )
+
+
+def _members() -> list[tuple[str, str]]:
+    return sorted((src.parent.name, _package(src)) for src in Path().glob("*/src"))
 
 
 def main() -> int:
