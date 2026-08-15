@@ -1,5 +1,0 @@
-#!/bin/sh
-set -e
-for p in */src; do
-    uv run --directory "${p%/src}" deptry src "$@"
-done
