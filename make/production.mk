@@ -40,7 +40,7 @@ hooks:  ## Install pre-commit git hooks: make hooks
 	uv run pre-commit install
 
 help:  ## This help
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 ps:  ## Container status: make ps
 	@$(SSH) 'docker ps --format "table {{.Names}}\t{{.Status}}" | awk "NR==1 || /$(PS_RE)/"'
