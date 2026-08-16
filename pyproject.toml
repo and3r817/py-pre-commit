@@ -1,6 +1,6 @@
 [project]
 name = "py-pre-commit"
-version = "0.2.0"
+version = "0.2.1"
 description = "Shared lint and check hooks for the duckalpha repos."
 requires-python = ">=3.14"
 dependencies = [
