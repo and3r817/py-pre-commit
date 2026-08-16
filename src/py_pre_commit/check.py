@@ -9,16 +9,22 @@ VULTURE_EXCLUDE = "**/tests/**,**/.venv/**"
 def steps(members: Sequence[tuple[str, str]]) -> list[tuple[str, ...]]:
     return [
         ("uv", "run", "ty", "check"),
-        (
-            "uv",
-            "run",
-            "vulture",
-            *(f"{directory}/src" for directory, _ in members),
-            "--exclude",
-            VULTURE_EXCLUDE,
-            "--min-confidence",
-            "80",
-            "--sort-by-size",
+        *(
+            [
+                (
+                    "uv",
+                    "run",
+                    "vulture",
+                    *(f"{directory}/src" for directory, _ in members),
+                    "--exclude",
+                    VULTURE_EXCLUDE,
+                    "--min-confidence",
+                    "80",
+                    "--sort-by-size",
+                )
+            ]
+            if members
+            else []
         ),
         *(
             (

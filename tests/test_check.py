@@ -16,6 +16,12 @@ def test_vulture_receives_every_member_src():
     assert result[1][:5] == ("uv", "run", "vulture", "alpha/src", "beta/src")
 
 
+def test_a_workspace_without_members_runs_only_ty():
+    result = steps([])
+
+    assert result == [("uv", "run", "ty", "check")]
+
+
 def test_deptry_runs_once_per_member():
     result = steps(MEMBERS)
     deptry = [cmd for cmd in result if "deptry" in cmd]
