@@ -1,5 +1,6 @@
+import argparse
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from fnmatch import fnmatch
 
 from identify.identify import tags_from_path
@@ -40,8 +41,12 @@ def _tracked() -> list[str]:
     return [path for path in completed.stdout.split("\0") if path]
 
 
-def _resolver() -> Callable[[tuple[str, ...], bool], list[str]]:
-    tracked = _tracked()
+def _resolver(
+    exclude: tuple[str, ...] = (),
+) -> Callable[[tuple[str, ...], bool], list[str]]:
+    tracked = [
+        path for path in _tracked() if not any(fnmatch(path, glob) for glob in exclude)
+    ]
     text = {path for path in tracked if "text" in tags_from_path(path)}
 
     def resolve(globs: tuple[str, ...], text_only: bool) -> list[str]:
@@ -57,5 +62,14 @@ def _resolver() -> Callable[[tuple[str, ...], bool], list[str]]:
     return resolve
 
 
-def main() -> int:
-    return max(subprocess.run(cmd).returncode for cmd in steps(_resolver()))
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(prog="py-lint")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        metavar="GLOB",
+        help="keep tracked files matching this fnmatch glob out of the hygiene steps",
+    )
+    exclude = tuple(parser.parse_args(argv).exclude)
+    return max(subprocess.run(cmd).returncode for cmd in steps(_resolver(exclude)))

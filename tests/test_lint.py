@@ -1,4 +1,6 @@
-from py_pre_commit.lint import BINARY_VISIBLE, HYGIENE, _resolver, steps
+from types import SimpleNamespace
+
+from py_pre_commit.lint import BINARY_VISIBLE, HYGIENE, _resolver, main, steps
 
 
 def test_whole_project_commands_come_first():
@@ -52,3 +54,31 @@ def test_resolver_matches_nested_paths_with_fnmatch(monkeypatch):
     resolve = _resolver()
 
     assert resolve(("*.py",), False) == ["pkg/mod.py"]
+
+
+def test_resolver_drops_excluded_paths_from_every_step(monkeypatch):
+    monkeypatch.setattr(
+        "py_pre_commit.lint._tracked", lambda: ["cases/a/doc.txt", "pkg/mod.txt"]
+    )
+    monkeypatch.setattr("py_pre_commit.lint.tags_from_path", lambda path: {"text"})
+
+    resolve = _resolver(("cases/*",))
+
+    assert resolve((), True) == ["pkg/mod.txt"]
+    assert resolve((), False) == ["pkg/mod.txt"]
+
+
+def test_main_passes_every_exclude_to_the_resolver(monkeypatch):
+    received = []
+
+    def resolver(exclude):
+        received.append(exclude)
+        return lambda globs, text_only: []
+
+    monkeypatch.setattr("py_pre_commit.lint._resolver", resolver)
+    monkeypatch.setattr(
+        "py_pre_commit.lint.subprocess.run", lambda cmd: SimpleNamespace(returncode=0)
+    )
+
+    assert main(["--exclude", "cases/*", "--exclude", "docs/*"]) == 0
+    assert received == [("cases/*", "docs/*")]
