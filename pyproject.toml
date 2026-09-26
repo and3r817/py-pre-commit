@@ -4,9 +4,9 @@ version = "0.3.0"
 description = "Shared lint and check hooks for the duckalpha repos."
 requires-python = ">=3.14"
 dependencies = [
-    "ruff==0.16.3",
+    "ruff==0.16.8",
     "pre-commit-hooks==6.0.0",
-    "uv==0.12.5",
+    "uv==0.12.18",
     "identify==2.6.19",
 ]
 
